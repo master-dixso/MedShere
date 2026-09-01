@@ -1,0 +1,6 @@
+{
+  "name": "Alpha III MedSphere Healthcare Cloud",
+  "description": "Enterprise Hospital Management System (HMS), Electronic Medical Records (EMR), HMO Claims Automation, and Clinical Operating Platform with high-performance edge architecture, dark mode, developer documentation, and test suite.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
