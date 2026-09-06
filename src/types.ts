@@ -110,6 +110,7 @@ export interface PatientRecord {
   age: number;
   gender: 'Female' | 'Male' | 'Other';
   bloodGroup: string;
+  allergies: string[];
   hmoProvider: string;
   hmoPolicyId: string;
   vitals: {
@@ -124,4 +125,48 @@ export interface PatientRecord {
   prescriptions: { drug: string; dosage: string; frequency: string; status: 'Dispensed' | 'Pending' }[];
   labRequests: { test: string; status: 'Completed' | 'In-Progress' | 'Sample Collected'; result?: string }[];
   claimStatus: 'Approved' | 'Pre-Auth Required' | 'Submitted' | 'Reconciled';
+}
+
+export type MetricRating = 'good' | 'needs-improvement' | 'poor' | 'measuring';
+
+export interface CoreWebVitalsMetrics {
+  lcp: number | null; // Largest Contentful Paint (ms)
+  cls: number;        // Cumulative Layout Shift (unitless score)
+  fcp: number | null; // First Contentful Paint (ms)
+  fid: number | null; // First Input Delay (ms)
+  inp: number | null; // Interaction to Next Paint (ms)
+  ttfb: number | null;// Time to First Byte (ms)
+  ratings: {
+    lcp: MetricRating;
+    cls: MetricRating;
+    fcp: MetricRating;
+    fid: MetricRating;
+    inp: MetricRating;
+    ttfb: MetricRating;
+  };
+  lastUpdated: number;
+  shiftEntriesCount: number;
+}
+
+export interface PerformanceMonitorOptions {
+  enableConsoleLog?: boolean;
+  logOnMetricChange?: boolean;
+  prefix?: string;
+  onUpdate?: (metrics: CoreWebVitalsMetrics) => void;
+}
+
+export interface MedSphereVitalsGlobal {
+  getMetrics: () => CoreWebVitalsMetrics;
+  getRatings: () => CoreWebVitalsMetrics['ratings'];
+  printReport: () => void;
+  logSummary: () => void;
+  reset: () => void;
+  onMetricChange: (listener: (metrics: CoreWebVitalsMetrics) => void) => () => void;
+  version: string;
+}
+
+declare global {
+  interface Window {
+    __medSphereVitals?: MedSphereVitalsGlobal;
+  }
 }

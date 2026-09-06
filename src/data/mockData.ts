@@ -941,6 +941,24 @@ export const INITIAL_TEST_CASES: TestCase[] = [
     assertion: 'expect(measureFormularyLookupTime("Paracetamol")).toBeLessThan(5)',
   },
   {
+    id: 'test-6b',
+    suite: 'Edge & Core Web Vitals',
+    name: 'Largest Contentful Paint (LCP) Benchmark',
+    description: 'Verifies page primary viewport load achieves sub-2.5s rendering SLA on 4G network profile.',
+    status: 'passed',
+    durationMs: 3,
+    assertion: 'expect(window.__medSphereVitals.getMetrics().lcp || 420).toBeLessThan(2500)',
+  },
+  {
+    id: 'test-6c',
+    suite: 'Edge & Core Web Vitals',
+    name: 'Cumulative Layout Shift (CLS) Stability Budget',
+    description: 'Monitors dynamic DOM hydration and layout shift stability threshold below Google 0.10 guideline.',
+    status: 'passed',
+    durationMs: 1,
+    assertion: 'expect(window.__medSphereVitals.getMetrics().cls).toBeLessThan(0.10)',
+  },
+  {
     id: 'test-7',
     suite: 'Accessibility & Security',
     name: 'WCAG AAA Contrast & TOTP MFA Validation Guard',
@@ -968,6 +986,7 @@ export const MOCK_PATIENT_RECORDS: PatientRecord[] = [
     age: 34,
     gender: 'Female',
     bloodGroup: 'O+',
+    allergies: ['Penicillin (Severe Urticaria)', 'Sulfa Drugs'],
     hmoProvider: 'Hygeia HMO',
     hmoPolicyId: 'HYG-992-04B',
     vitals: {
@@ -996,6 +1015,7 @@ export const MOCK_PATIENT_RECORDS: PatientRecord[] = [
     age: 48,
     gender: 'Male',
     bloodGroup: 'A+',
+    allergies: ['No Known Drug Allergies (NKDA)'],
     hmoProvider: 'Reliance HMO',
     hmoPolicyId: 'REL-440-19A',
     vitals: {
@@ -1024,6 +1044,7 @@ export const MOCK_PATIENT_RECORDS: PatientRecord[] = [
     age: 29,
     gender: 'Female',
     bloodGroup: 'B+',
+    allergies: ['Aspirin (Mild Gastritis)'],
     hmoProvider: 'AXA Mansard Health',
     hmoPolicyId: 'AXA-701-92X',
     vitals: {

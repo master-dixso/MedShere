@@ -2,10 +2,134 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Mathematical Modular Type System (Base: 16px, Ratio: 1.125 Major Second / 1.25 Major Third for display) */
+:root {
+  --type-3xs: 0.6875rem; /* 11px - Micro metadata & status tags */
+  --type-2xs: 0.75rem;   /* 12px - Dense table headers, compact captions */
+  --type-xs: 0.8125rem;  /* 13px - High-density data cells, interactive badges */
+  --type-sm: 0.875rem;   /* 14px - Sub-body, secondary metadata, input fields */
+  --type-base: 1rem;     /* 16px - Standard readable body (WCAG baseline) */
+  --type-lg: 1.125rem;   /* 18px - Subheadings, key metrics label */
+  --type-xl: 1.25rem;    /* 20px - Section sub-titles, card titles */
+  --type-2xl: 1.5rem;    /* 24px - Modal headers, panel titles */
+  --type-3xl: 1.875rem;  /* 30px - Section headlines, large metrics */
+  --type-4xl: 2.25rem;   /* 36px - Tier titles, major figures */
+  --type-5xl: 3rem;      /* 48px - Primary display heroes */
+
+  /* Vertical Rhythm Row Baseline (8px unit with 4px sub-grid) */
+  --rhythm-unit: 0.25rem;
+  --rhythm-base: 1.5rem;
+}
+
 @layer base {
   body {
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11", "calt", "liga";
+    font-variant-numeric: tabular-nums lining-nums;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
+
+  /* High-density tabular numbers for data reliability */
+  table, .data-grid, .font-mono, .tabular-nums {
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+
+  /* Focus visible accessibility standards (WCAG 2.2) */
+  :focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+  }
+  .dark :focus-visible {
+    outline-color: #60a5fa;
+  }
+}
+
+/* Typography Scale Utility Classes for Strict Vertical Rhythm */
+.type-scale-3xs {
+  font-size: var(--type-3xs);
+  line-height: 1.35;
+  letter-spacing: 0.035em;
+}
+
+.type-scale-2xs {
+  font-size: var(--type-2xs);
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+}
+
+.type-scale-xs {
+  font-size: var(--type-xs);
+  line-height: 1.45;
+  letter-spacing: 0.01em;
+}
+
+.type-scale-sm {
+  font-size: var(--type-sm);
+  line-height: 1.5;
+  letter-spacing: 0.005em;
+}
+
+.type-scale-base {
+  font-size: var(--type-base);
+  line-height: 1.6;
+}
+
+.type-scale-lg {
+  font-size: var(--type-lg);
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+}
+
+.type-scale-xl {
+  font-size: var(--type-xl);
+  line-height: 1.4;
+  letter-spacing: -0.015em;
+}
+
+.type-scale-2xl {
+  font-size: var(--type-2xl);
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+}
+
+.type-scale-3xl {
+  font-size: var(--type-3xl);
+  line-height: 1.25;
+  letter-spacing: -0.025em;
+}
+
+.type-scale-4xl {
+  font-size: var(--type-4xl);
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+}
+
+/* High-Density Data View Containers */
+.data-dense-table {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.data-dense-table th {
+  font-size: var(--type-2xs);
+  line-height: 1.35;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 0.5rem 0.75rem;
+}
+
+.data-dense-table td {
+  font-size: var(--type-xs);
+  line-height: 1.45;
+  padding: 0.5rem 0.75rem;
+  vertical-align: middle;
+}
+
+/* Numeric & Metric Display */
+.metric-numeric {
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: -0.02em;
 }
 
 /* Professional Polish Custom Scrollbar */
@@ -33,4 +157,151 @@
 
 .dark ::-webkit-scrollbar-thumb:hover {
   background: rgba(71, 85, 105, 0.8);
+}
+
+/* Hidden on screen by default; rendered purely during print operations */
+#medsphere-print-container {
+  display: none;
+}
+
+/* ==========================================================================
+   Print-Specific Styles for High-Fidelity Clinical & Pricing PDF Exports
+   ========================================================================== */
+@media print {
+  /* Dedicated print swap mode: isolates the print container */
+  body.medsphere-printing-active > *:not(#medsphere-print-container) {
+    display: none !important;
+  }
+
+  body.medsphere-printing-active #medsphere-print-container {
+    display: block !important;
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+  }
+
+  /* Hide non-essential interactive and navigation UI elements */
+  #main-header,
+  header,
+  nav,
+  footer,
+  #medsphere-ai-support-toggle,
+  [role="region"][aria-label="MedSphere AI Support Assistant"],
+  .no-print,
+  button:not(.print-keep),
+  input[type="range"],
+  .custom-scrollbar::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  /* Optimize page layout, typography, and contrast for ink/PDF generation */
+  @page {
+    margin: 1.2cm 1cm;
+    size: auto;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 11pt !important;
+    line-height: 1.4 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  /* Reset dark mode styles to clean high-contrast black/white in print */
+  .dark {
+    color-scheme: light !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+  }
+
+  .dark * {
+    background-color: transparent !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* Container and Section Reset */
+  section,
+  main,
+  article,
+  .pt-20,
+  .pt-16,
+  .scroll-mt-24,
+  .scroll-mt-28 {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+    margin: 0 !important;
+    border: none !important;
+  }
+
+  /* Table, Card, and Grid Polish */
+  table,
+  .data-dense-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    page-break-inside: auto;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  th,
+  td {
+    border: 1px solid #e2e8f0 !important;
+    color: #0f172a !important;
+  }
+
+  /* Keep cards structured with subtle borders and avoid awkward page breaks */
+  .rounded-3xl,
+  .rounded-2xl,
+  .rounded-xl {
+    border-radius: 6px !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+  }
+
+  /* Ensure modal content fits seamlessly on the page when printed */
+  [role="dialog"] {
+    position: static !important;
+    inset: auto !important;
+    background: transparent !important;
+    padding: 0 !important;
+    display: block !important;
+  }
+
+  [role="dialog"] > div {
+    max-width: 100% !important;
+    max-height: none !important;
+    box-shadow: none !important;
+    border: none !important;
+    overflow: visible !important;
+  }
+
+  /* Expand hidden scrollable areas for complete export */
+  .overflow-hidden,
+  .overflow-y-auto,
+  .overflow-x-auto,
+  .max-h-64 {
+    overflow: visible !important;
+    max-height: none !important;
+  }
 }

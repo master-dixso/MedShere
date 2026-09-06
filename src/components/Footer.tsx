@@ -16,16 +16,40 @@ interface FooterProps {
   setCurrentRoute: (route: NavRoute) => void;
   onOpenBookDemo: () => void;
   onOpenSandbox: () => void;
+  onSelectModule?: (moduleId: string) => void;
+  onSelectCategory?: (category: 'all' | 'core' | 'specialty' | 'operations' | 'infrastructure') => void;
+  onSelectSolution?: (solutionId: string) => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({
   setCurrentRoute,
   onOpenBookDemo,
   onOpenSandbox,
+  onSelectModule,
+  onSelectCategory,
+  onSelectSolution,
 }) => {
   const handleNav = (route: NavRoute) => {
     setCurrentRoute(route);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleModuleClick = (moduleId: string) => {
+    if (onSelectModule) {
+      onSelectModule(moduleId);
+    } else {
+      setCurrentRoute('modules');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handleSolutionClick = (solutionId: string) => {
+    if (onSelectSolution) {
+      onSelectSolution(solutionId);
+    } else {
+      setCurrentRoute('solutions');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   return (
@@ -72,7 +96,7 @@ export const Footer: React.FC<FooterProps> = ({
             <ul className="space-y-2 text-xs">
               <li>
                 <button
-                  onClick={() => handleNav('solutions')}
+                  onClick={() => handleSolutionClick('private')}
                   className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer text-left"
                 >
                   Private Hospitals & Clinics
@@ -80,7 +104,7 @@ export const Footer: React.FC<FooterProps> = ({
               </li>
               <li>
                 <button
-                  onClick={() => handleNav('solutions')}
+                  onClick={() => handleSolutionClick('public')}
                   className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer text-left"
                 >
                   Public & Teaching Hospitals
@@ -88,7 +112,7 @@ export const Footer: React.FC<FooterProps> = ({
               </li>
               <li>
                 <button
-                  onClick={() => handleNav('solutions')}
+                  onClick={() => handleSolutionClick('multi-site')}
                   className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer text-left"
                 >
                   Multi-Site Hospital Chains
@@ -96,7 +120,7 @@ export const Footer: React.FC<FooterProps> = ({
               </li>
               <li>
                 <button
-                  onClick={() => handleNav('solutions')}
+                  onClick={() => handleSolutionClick('legacy-emr')}
                   className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer text-left"
                 >
                   Legacy EMR Data Migration
@@ -104,7 +128,7 @@ export const Footer: React.FC<FooterProps> = ({
               </li>
               <li>
                 <button
-                  onClick={() => handleNav('solutions')}
+                  onClick={() => handleSolutionClick('insurer')}
                   className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer text-left"
                 >
                   Insurer / HMO Networks
@@ -121,7 +145,7 @@ export const Footer: React.FC<FooterProps> = ({
             <ul className="space-y-2 text-xs">
               <li>
                 <button
-                  onClick={() => handleNav('modules')}
+                  onClick={() => handleModuleClick('emr')}
                   className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer text-left"
                 >
                   Electronic Medical Records (EMR)
@@ -129,7 +153,7 @@ export const Footer: React.FC<FooterProps> = ({
               </li>
               <li>
                 <button
-                  onClick={() => handleNav('modules')}
+                  onClick={() => handleModuleClick('hms')}
                   className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer text-left"
                 >
                   Hospital Operations (HMS)
@@ -137,7 +161,7 @@ export const Footer: React.FC<FooterProps> = ({
               </li>
               <li>
                 <button
-                  onClick={() => handleNav('modules')}
+                  onClick={() => handleModuleClick('lab')}
                   className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer text-left"
                 >
                   Laboratory LIS & Pathologist Sign-Off
@@ -145,7 +169,7 @@ export const Footer: React.FC<FooterProps> = ({
               </li>
               <li>
                 <button
-                  onClick={() => handleNav('modules')}
+                  onClick={() => handleModuleClick('pharmacy')}
                   className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer text-left"
                 >
                   Pharmacy & FEFO Dispensing
@@ -153,7 +177,7 @@ export const Footer: React.FC<FooterProps> = ({
               </li>
               <li>
                 <button
-                  onClick={() => handleNav('modules')}
+                  onClick={() => handleModuleClick('claims')}
                   className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer text-left"
                 >
                   HMO Claims & Pre-Auth

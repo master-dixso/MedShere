@@ -22,11 +22,120 @@ import { ClinicalModule } from '../types';
 
 interface ModulesShowcaseProps {
   onOpenSandbox: () => void;
+  selectedModuleId?: string;
+  onSelectModule?: (moduleId: string) => void;
+  selectedCategory?: 'all' | 'core' | 'specialty' | 'operations' | 'infrastructure';
+  onSelectCategory?: (category: 'all' | 'core' | 'specialty' | 'operations' | 'infrastructure') => void;
 }
 
-export const ModulesShowcase: React.FC<ModulesShowcaseProps> = ({ onOpenSandbox }) => {
-  const [selectedModuleId, setSelectedModuleId] = useState<string>(CLINICAL_MODULES[0].id);
-  const [categoryFilter, setCategoryFilter] = useState<'all' | 'core' | 'specialty' | 'operations' | 'infrastructure'>('all');
+export const ModulesShowcase: React.FC<ModulesShowcaseProps> = ({
+  onOpenSandbox,
+  selectedModuleId: propSelectedModuleId,
+  onSelectModule,
+  selectedCategory: propSelectedCategory,
+  onSelectCategory,
+}) => {
+  const [internalSelectedModuleId, setInternalSelectedModuleId] = useState<string>(
+    propSelectedModuleId || CLINICAL_MODULES[0].id
+  );
+  const [categoryFilter, setCategoryFilter] = useState<'all' | 'core' | 'specialty' | 'operations' | 'infrastructure'>(
+    propSelectedCategory || 'all'
+  );
+  const [highlightedId, setHighlightedId] = useState<string | null>(null);
+
+  // Smooth scroll helper to bring modules section / cards / inspector into clear view
+  const scrollToFocus = (moduleId?: string) => {
+    setTimeout(() => {
+      // 1. Scroll window so the modules showcase section is in prime focus
+      const sectionEl = document.getElementById('modules-showcase-section');
+      if (sectionEl) {
+        const headerOffset = 80;
+        const bodyRect = document.body.getBoundingClientRect().top;
+        const elementRect = sectionEl.getBoundingClientRect().top;
+        const offsetPosition = elementRect - bodyRect - headerOffset;
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth',
+        });
+      }
+
+      // 2. Scroll the specific card into view within the scrollable cards column
+      const targetId = moduleId || propSelectedModuleId || internalSelectedModuleId;
+      if (targetId) {
+        const cardEl = document.getElementById(`module-card-${targetId}`);
+        if (cardEl) {
+          cardEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    }, 50);
+  };
+
+  // Sync internal selected module when prop changes
+  React.useEffect(() => {
+    if (propSelectedModuleId) {
+      setInternalSelectedModuleId(propSelectedModuleId);
+      const targetMod = CLINICAL_MODULES.find((m) => m.id === propSelectedModuleId);
+      if (targetMod && categoryFilter !== 'all' && targetMod.category !== categoryFilter) {
+        setCategoryFilter('all');
+      }
+      setHighlightedId(propSelectedModuleId);
+      const timer = setTimeout(() => setHighlightedId(null), 1200);
+      scrollToFocus(propSelectedModuleId);
+      return () => clearTimeout(timer);
+    }
+  }, [propSelectedModuleId]);
+
+  // Sync internal category when prop changes
+  React.useEffect(() => {
+    if (propSelectedCategory && propSelectedCategory !== categoryFilter) {
+      setCategoryFilter(propSelectedCategory);
+      if (propSelectedCategory !== 'all') {
+        const firstInCat = CLINICAL_MODULES.find((m) => m.category === propSelectedCategory);
+        if (firstInCat) {
+          setInternalSelectedModuleId(firstInCat.id);
+          onSelectModule?.(firstInCat.id);
+        }
+      }
+      scrollToFocus();
+    }
+  }, [propSelectedCategory]);
+
+  const selectedModuleId = propSelectedModuleId || internalSelectedModuleId;
+
+  const handleSelectModule = (id: string) => {
+    setInternalSelectedModuleId(id);
+    setHighlightedId(id);
+    onSelectModule?.(id);
+
+    const targetMod = CLINICAL_MODULES.find((m) => m.id === id);
+    if (targetMod && categoryFilter !== 'all' && targetMod.category !== categoryFilter) {
+      setCategoryFilter('all');
+    }
+
+    scrollToFocus(id);
+    setTimeout(() => setHighlightedId(null), 1200);
+  };
+
+  const handleCategoryFilterClick = (catId: 'all' | 'core' | 'specialty' | 'operations' | 'infrastructure') => {
+    setCategoryFilter(catId);
+    onSelectCategory?.(catId);
+
+    // When clicking a category, automatically highlight the first module in that category
+    let targetId = selectedModuleId;
+    if (catId !== 'all') {
+      const firstInCat = CLINICAL_MODULES.find((m) => m.category === catId);
+      if (firstInCat) {
+        targetId = firstInCat.id;
+        setInternalSelectedModuleId(firstInCat.id);
+        onSelectModule?.(firstInCat.id);
+      }
+    }
+
+    setHighlightedId(targetId);
+    scrollToFocus(targetId);
+    setTimeout(() => setHighlightedId(null), 1200);
+  };
 
   const filteredModules = CLINICAL_MODULES.filter((mod) =>
     categoryFilter === 'all' ? true : mod.category === categoryFilter
@@ -67,7 +176,7 @@ export const ModulesShowcase: React.FC<ModulesShowcaseProps> = ({ onOpenSandbox 
   };
 
   return (
-    <section id="modules-showcase-section" className="py-20 bg-white dark:bg-[#020617] border-b border-slate-200 dark:border-slate-800">
+    <section id="modules-showcase-section" className="py-20 bg-white dark:bg-[#020617] border-b border-slate-200 dark:border-slate-800 scroll-mt-24 sm:scroll-mt-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-12">
@@ -94,10 +203,11 @@ export const ModulesShowcase: React.FC<ModulesShowcaseProps> = ({ onOpenSandbox 
           ].map((cat) => (
             <button
               key={cat.id}
-              onClick={() => setCategoryFilter(cat.id as any)}
+              id={`category-filter-${cat.id}`}
+              onClick={() => handleCategoryFilterClick(cat.id as any)}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 categoryFilter === cat.id
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-500/25 ring-2 ring-blue-400/40'
                   : 'bg-slate-100 dark:bg-[#0B1120] border border-transparent dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800'
               }`}
             >
@@ -107,20 +217,25 @@ export const ModulesShowcase: React.FC<ModulesShowcaseProps> = ({ onOpenSandbox 
         </div>
 
         {/* Module Grid & Live Interactive Inspector */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div id="modules-interactive-grid" className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left: Module Card Grid */}
-          <div className="lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[580px] overflow-y-auto pr-1">
+          <div
+            id="modules-cards-container"
+            className="lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[580px] overflow-y-auto pr-1 scroll-smooth"
+          >
             {filteredModules.map((mod) => {
               const isSelected = mod.id === selectedModuleId;
+              const isHighlighted = highlightedId === mod.id;
               return (
                 <button
                   key={mod.id}
-                  onClick={() => setSelectedModuleId(mod.id)}
-                  className={`text-left p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between ${
+                  id={`module-card-${mod.id}`}
+                  onClick={() => handleSelectModule(mod.id)}
+                  className={`text-left p-4 rounded-2xl border transition-all duration-300 cursor-pointer flex flex-col justify-between relative ${
                     isSelected
-                      ? 'border-blue-500 bg-blue-50/70 dark:bg-blue-950/40 shadow-md ring-2 ring-blue-500/20'
+                      ? 'border-blue-500 bg-blue-50/80 dark:bg-blue-950/50 shadow-md ring-2 ring-blue-500/30'
                       : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0B1120] hover:bg-slate-50 dark:hover:bg-slate-850'
-                  }`}
+                  } ${isHighlighted ? 'scale-[1.02] ring-4 ring-blue-500/40 z-10' : ''}`}
                 >
                   <div>
                     <div className="flex items-center justify-between mb-3">
@@ -130,9 +245,13 @@ export const ModulesShowcase: React.FC<ModulesShowcaseProps> = ({ onOpenSandbox 
                       >
                         {renderModuleIcon(mod.icon)}
                       </div>
-                      {mod.badge && (
+                      {mod.badge ? (
                         <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-transparent dark:border-slate-700">
                           {mod.badge}
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-semibold text-slate-400 capitalize">
+                          {mod.category === 'infrastructure' ? 'Data & ETL' : mod.category}
                         </span>
                       )}
                     </div>
@@ -145,8 +264,8 @@ export const ModulesShowcase: React.FC<ModulesShowcaseProps> = ({ onOpenSandbox 
                   </div>
 
                   <div className="mt-4 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] font-semibold text-blue-600 dark:text-blue-400">
-                    <span>Inspect UI</span>
-                    <ArrowRight className="w-3 h-3" />
+                    <span>{isSelected ? 'Active in Inspector' : 'Inspect Details & Live UI'}</span>
+                    <ArrowRight className={`w-3 h-3 transition-transform ${isSelected ? 'translate-x-0.5' : ''}`} />
                   </div>
                 </button>
               );
@@ -154,7 +273,12 @@ export const ModulesShowcase: React.FC<ModulesShowcaseProps> = ({ onOpenSandbox 
           </div>
 
           {/* Right: Active Module Live UI Inspector */}
-          <div className="lg:col-span-6 bg-white dark:bg-[#0B1120] text-slate-900 dark:text-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200 dark:border-slate-800 space-y-6 ring-1 ring-blue-500/10 transition-colors">
+          <div
+            id="active-module-inspector"
+            className={`lg:col-span-6 bg-white dark:bg-[#0B1120] text-slate-900 dark:text-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200 dark:border-slate-800 space-y-6 ring-1 ring-blue-500/10 transition-all duration-300 ${
+              highlightedId === activeModule.id ? 'ring-2 ring-blue-500/40 shadow-2xl' : ''
+            }`}
+          >
             <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-3">
                 <div

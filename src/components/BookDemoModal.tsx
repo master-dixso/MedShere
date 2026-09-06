@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   Calendar,
@@ -29,6 +29,22 @@ export const BookDemoModal: React.FC<BookDemoModalProps> = ({ isOpen, onClose })
   const [demoDate, setDemoDate] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    if (isOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'hidden';
+    }
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -46,10 +62,16 @@ export const BookDemoModal: React.FC<BookDemoModalProps> = ({ isOpen, onClose })
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xs font-sans">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xs font-sans"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-walkthrough-title"
+    >
       <div className="bg-white dark:bg-[#0B1120] rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 dark:border-slate-800 relative max-h-[92vh] overflow-y-auto">
         <button
           onClick={onClose}
+          aria-label="Close walkthrough booking dialog"
           className="absolute top-5 right-5 p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
         >
           <X className="w-5 h-5" />
@@ -62,7 +84,7 @@ export const BookDemoModal: React.FC<BookDemoModalProps> = ({ isOpen, onClose })
                 <Calendar className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-xl font-extrabold text-slate-900 dark:text-white">
+                <h3 id="modal-walkthrough-title" className="text-xl font-extrabold text-slate-900 dark:text-white">
                   Schedule Clinical Walkthrough
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">

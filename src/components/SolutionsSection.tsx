@@ -16,10 +16,31 @@ import { SolutionItem } from '../types';
 
 interface SolutionsSectionProps {
   onOpenBookDemo: () => void;
+  selectedSolutionId?: string;
+  onSelectSolution?: (solutionId: string) => void;
 }
 
-export const SolutionsSection: React.FC<SolutionsSectionProps> = ({ onOpenBookDemo }) => {
-  const [selectedSolutionId, setSelectedSolutionId] = useState<string>(SOLUTIONS_LIST[0].id);
+export const SolutionsSection: React.FC<SolutionsSectionProps> = ({
+  onOpenBookDemo,
+  selectedSolutionId: propSelectedSolutionId,
+  onSelectSolution,
+}) => {
+  const [internalSelectedSolutionId, setInternalSelectedSolutionId] = useState<string>(
+    propSelectedSolutionId || SOLUTIONS_LIST[0].id
+  );
+
+  React.useEffect(() => {
+    if (propSelectedSolutionId) {
+      setInternalSelectedSolutionId(propSelectedSolutionId);
+    }
+  }, [propSelectedSolutionId]);
+
+  const selectedSolutionId = propSelectedSolutionId || internalSelectedSolutionId;
+
+  const handleSelectSolution = (id: string) => {
+    setInternalSelectedSolutionId(id);
+    onSelectSolution?.(id);
+  };
 
   const selectedSolution =
     SOLUTIONS_LIST.find((s) => s.id === selectedSolutionId) || SOLUTIONS_LIST[0];
@@ -44,7 +65,7 @@ export const SolutionsSection: React.FC<SolutionsSectionProps> = ({ onOpenBookDe
   };
 
   return (
-    <section id="solutions-section" className="py-20 bg-slate-50 dark:bg-[#020617] border-b border-slate-200 dark:border-slate-800">
+    <section id="solutions-section" className="py-20 bg-slate-50 dark:bg-[#020617] border-b border-slate-200 dark:border-slate-800 scroll-mt-24 sm:scroll-mt-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-14">
@@ -67,7 +88,7 @@ export const SolutionsSection: React.FC<SolutionsSectionProps> = ({ onOpenBookDe
             return (
               <button
                 key={sol.id}
-                onClick={() => setSelectedSolutionId(sol.id)}
+                onClick={() => handleSelectSolution(sol.id)}
                 className={`flex items-center gap-2 px-4 py-3 rounded-2xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer shrink-0 border ${
                   isSelected
                     ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/20'

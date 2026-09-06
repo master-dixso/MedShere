@@ -54,6 +54,20 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
     }
   }, [messages, isOpen]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onToggle();
+      }
+    };
+    if (isOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onToggle]);
+
   const handleSendMessage = (textToSend?: string) => {
     const text = (textToSend || inputText).trim();
     if (!text) return;
@@ -120,18 +134,34 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
       {!isOpen && (
         <button
           onClick={onToggle}
-          className="p-4 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-xl shadow-blue-500/30 hover:scale-105 transition-all flex items-center gap-2 cursor-pointer group"
-          aria-label="Open AI Healthcare Assistant"
+          id="medsphere-ai-support-toggle"
+          className="group relative flex items-center justify-center h-12 sm:h-14 p-3.5 sm:p-4 rounded-full bg-gradient-to-tr from-blue-600 via-blue-600 to-indigo-600 text-white shadow-xl shadow-blue-500/30 hover:shadow-2xl hover:shadow-blue-500/40 hover:scale-105 transition-all duration-300 ease-in-out cursor-pointer overflow-hidden border border-blue-400/30"
+          aria-label="Open MedSphere AI Support"
+          title="MedSphere AI Support"
         >
-          <Sparkles className="w-5 h-5 animate-pulse" />
-          <span className="text-xs font-bold hidden sm:inline pr-1">24/7 AI Healthcare Assistant</span>
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 border border-white"></span>
+          <div className="relative shrink-0 flex items-center justify-center">
+            <Sparkles className="w-5 h-5 text-white animate-pulse" />
+            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-blue-600 group-hover:border-indigo-600 transition-colors"></span>
+          </div>
+
+          <div className="max-w-0 group-hover:max-w-xs opacity-0 group-hover:opacity-100 transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap flex items-center gap-2 pl-0 group-hover:pl-2.5">
+            <span className="text-xs font-bold text-white tracking-wide">
+              MedSphere AI Support
+            </span>
+            <span className="text-[9px] font-bold uppercase tracking-wider bg-emerald-400/20 text-emerald-200 border border-emerald-400/30 px-1.5 py-0.5 rounded-full hidden sm:inline">
+              Online
+            </span>
+          </div>
         </button>
       )}
 
       {/* Expanded Chat Window */}
       {isOpen && (
-        <div className="bg-white dark:bg-[#0B1120] text-slate-900 dark:text-white rounded-3xl w-[360px] sm:w-[400px] h-[520px] max-h-[85vh] flex flex-col shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-in slide-in-from-bottom-5">
+        <div
+          role="region"
+          aria-label="MedSphere AI Support Assistant"
+          className="bg-white dark:bg-[#0B1120] text-slate-900 dark:text-white rounded-3xl w-[360px] sm:w-[400px] h-[520px] max-h-[85vh] flex flex-col shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-in slide-in-from-bottom-5"
+        >
           {/* Header */}
           <div className="p-4 bg-slate-50 dark:bg-[#020617] border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
             <div className="flex items-center gap-2.5">

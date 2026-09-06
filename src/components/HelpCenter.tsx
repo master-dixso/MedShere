@@ -42,7 +42,7 @@ export const HelpCenter: React.FC<HelpCenterProps> = ({
   };
 
   return (
-    <section id="help-faqs-section" className="py-20 bg-slate-50 dark:bg-[#020617] border-b border-slate-200 dark:border-slate-800 font-sans">
+    <section id="help-faqs-section" className="py-20 bg-slate-50 dark:bg-[#020617] border-b border-slate-200 dark:border-slate-800 font-sans scroll-mt-24 sm:scroll-mt-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-12">

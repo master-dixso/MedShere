@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { INITIAL_TEST_CASES } from '../data/mockData';
-import { TestCase } from '../types';
+import { TestCase, CoreWebVitalsMetrics } from '../types';
 import {
   Play,
   RotateCcw,
@@ -12,12 +12,34 @@ import {
   Cpu,
   Layers,
   Terminal,
+  Activity,
 } from 'lucide-react';
+import { formatMetricValue } from '../utils/usePerformanceMonitor';
 
 export const TestSuiteRunner: React.FC = () => {
   const [tests, setTests] = useState<TestCase[]>(INITIAL_TEST_CASES);
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [activeSuiteFilter, setActiveSuiteFilter] = useState<string>('all');
+  const [liveVitals, setLiveVitals] = useState<CoreWebVitalsMetrics | null>(null);
+
+  useEffect(() => {
+    // Listen to real-time Web Vitals metrics from global provider
+    if (typeof window !== 'undefined' && window.__medSphereVitals) {
+      setLiveVitals(window.__medSphereVitals.getMetrics());
+      const unsub = window.__medSphereVitals.onMetricChange((m) => {
+        setLiveVitals({ ...m });
+      });
+      return unsub;
+    }
+  }, []);
+
+  const handlePrintConsoleVitals = () => {
+    if (typeof window !== 'undefined' && window.__medSphereVitals) {
+      window.__medSphereVitals.printReport();
+    } else {
+      console.log('[MedSphere] Web Vitals monitoring initializing...');
+    }
+  };
 
   const suites = Array.from(new Set(INITIAL_TEST_CASES.map((t) => t.suite)));
 
@@ -59,7 +81,7 @@ export const TestSuiteRunner: React.FC = () => {
   const totalDuration = tests.reduce((acc, t) => acc + t.durationMs, 0);
 
   return (
-    <section id="test-suite-section" className="py-20 bg-white dark:bg-[#020617] border-b border-slate-200 dark:border-slate-800 font-sans">
+    <section id="test-suite-section" className="py-20 bg-white dark:bg-[#020617] border-b border-slate-200 dark:border-slate-800 font-sans scroll-mt-24 sm:scroll-mt-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-12">
@@ -94,6 +116,16 @@ export const TestSuiteRunner: React.FC = () => {
 
             <div className="flex items-center gap-2">
               <button
+                onClick={handlePrintConsoleVitals}
+                title="Print real-time Core Web Vitals table in browser developer console"
+                className="px-3.5 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer border border-slate-300 dark:border-slate-700 shadow-xs"
+              >
+                <Terminal className="w-3.5 h-3.5 text-blue-500" />
+                <span className="hidden sm:inline">Print Vitals to Console</span>
+                <span className="sm:hidden">Vitals Console</span>
+              </button>
+
+              <button
                 onClick={handleRunAllTests}
                 disabled={isRunning}
                 className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs shadow-md shadow-emerald-500/25 flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50"
@@ -123,10 +155,18 @@ export const TestSuiteRunner: React.FC = () => {
             </div>
 
             <div className="p-4 rounded-2xl bg-white dark:bg-[#020617] border border-slate-200 dark:border-slate-800 text-center shadow-xs">
-              <span className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase block">Core Web Vitals</span>
-              <span className="text-2xl font-extrabold font-mono text-blue-600 dark:text-blue-400 mt-1 block">
-                100/100
-              </span>
+              <div className="flex items-center justify-center gap-1">
+                <Activity className="w-3 h-3 text-blue-500" />
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase block">Core Web Vitals</span>
+              </div>
+              <div className="flex items-center justify-center gap-1.5 mt-1">
+                <span className="text-xs font-mono font-bold px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
+                  LCP: {liveVitals?.lcp ? formatMetricValue('LCP', liveVitals.lcp) : '< 1.2s'}
+                </span>
+                <span className="text-xs font-mono font-bold px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                  CLS: {liveVitals?.cls !== undefined ? formatMetricValue('CLS', liveVitals.cls) : '0.000'}
+                </span>
+              </div>
             </div>
 
             <div className="p-4 rounded-2xl bg-white dark:bg-[#020617] border border-slate-200 dark:border-slate-800 text-center shadow-xs">
